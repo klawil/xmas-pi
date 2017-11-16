@@ -20,7 +20,7 @@ def get_file_data(filename):
     # Return the data and the rate
     return rate, data
 
-def parse_file_standard(filename, max_per_sec = 2):
+def parse_file_standard(filename, max_per_sec = 4):
     # Read the file
     rate, data = get_file_data(filename)
 
@@ -33,7 +33,7 @@ def parse_file_standard(filename, max_per_sec = 2):
     # Return the peaks
     return peaks
 
-def parse_file_frequency(filename, max_per_sec = 2, frequency=(25, 125)):
+def parse_file_frequency(filename, max_per_sec = 4, frequency=(25, 125)):
     from matplotlib import mlab
     import scipy
     import sys
@@ -45,8 +45,13 @@ def parse_file_frequency(filename, max_per_sec = 2, frequency=(25, 125)):
     # Get the specgram
     pxx, freqs, bins = mlab.specgram(data, Fs=rate, sides='onesided', NFFT=256)
 
+    # Normalize all of the data
+    norm_pxx = []
+    for row in pxx:
+        norm_pxx.append(peakutils.prepare.scale(row, new_range=(0.0, 1.0), eps=1e-9)[0])
+
     # Get the data we actually want
-    data = scipy.sum(pxx, axis=0)
+    data = scipy.sum(norm_pxx, axis=0)
 
     # Scale the data so threshold is maintained
     data, unused_info = peakutils.prepare.scale(data, new_range=(0.0, 1.0), eps=1e-9)

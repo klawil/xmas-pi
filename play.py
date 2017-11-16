@@ -1,13 +1,13 @@
 import audio_parser
 import audio_player
-import getopts
+import getopt
 import sys
 
 # Set up the channels
 audio_player.initialize_channels(['red', 'green', 'blue', 'white'])
 
 # Get the options
-options = getopts.getopts(sys.argv[1:], '', ['input=', 'method='])
+options, leftover = getopt.getopt(sys.argv[1:], '', ['input=', 'method='])
 
 # Set the defaults
 filename = 'rockin_xmas_tree.wav'
@@ -17,7 +17,7 @@ peak_method = 'standard'
 for option, value in options:
     if option is '--input':
         filename = value
-    else if option is '--method':
+    elif option is '--method':
         peak_method = value
 
 # Parse the music file

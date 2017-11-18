@@ -3,6 +3,7 @@ import pyaudio
 import random
 import sys
 import wave
+import output
 
 channel_states = [] # The states of the channels
 channel_names = [] # The names of the channels
@@ -60,6 +61,7 @@ def change_channel(channel = None, max_on = 3):
 
         # Toggle the channel
         channel_states[channel_to_change] = not channel_states[channel_to_change]
+        output.changeState(channel_to_change, channel_states[channel_to_change])
 
         # Make sure at least one channel is turned on
         while True not in channel_states:
@@ -72,6 +74,7 @@ def change_channel(channel = None, max_on = 3):
 
             # Turn the new channel on
             channel_states[turn_on_channel] = not channel_states[turn_on_channel]
+            output.changeState(turn_on_channel, channel_states[turn_on_channel])
 
     # Print the channel states
     print_state()

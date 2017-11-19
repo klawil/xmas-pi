@@ -4,9 +4,10 @@ import logging
 logging.basicConfig(format='%(asctime)s %(levelname)s: %(name)s: %(message)s', level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
 log = logging.getLogger('GPIO')
 
-BCM = None
-LOW = False
-HIGH = True
+BCM = 'BCM'
+LOW = 'LOW'
+HIGH = 'HIGH'
+OUT = 'OUT'
 
 def setmode(mode):
     log.info('Changing Mode')
@@ -16,3 +17,6 @@ def setwarnings(warning):
 
 def output(pin, state):
     log.info('Changing Pin {} State to {}'.format(str(pin), str(state)))
+
+def setup(pin, state):
+    log.info('Changing Pin {} Mode to {}'.format(str(pin), str(state)))

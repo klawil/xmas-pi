@@ -13,6 +13,11 @@ pins = [7, 8, 25, 24, 23, 18, 15, 14]
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
+# Default all of the pins to HIGH
+for pin in pins:
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, GPIO.HIGH)
+
 def changeState(channel, state):
     # Validate the channel
     channel = int(channel)

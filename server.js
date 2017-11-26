@@ -87,6 +87,9 @@ function requestHandler(request, response) {
         // Get the status of the channels
         getChannelStatus(response);
         break;
+      case '/google':
+        // Hand off to the google handler
+        googleAssistantHandler(request_body, response);
       default:
         response.writeHead(404);
         return response.end();
@@ -132,4 +135,10 @@ function channelStatusCallback(response, channel, error, state) {
     response.writeHead(200);
     return response.end(JSON.stringify(channels));
   }
+}
+
+function googleAssistantHandler(request, response) {
+  console.log(request);
+  response.writeHead(204);
+  return response.end();
 }

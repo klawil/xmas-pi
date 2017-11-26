@@ -1,0 +1,17 @@
+{
+    "name": "xmas_pi",
+    "pretty_name": "Raspberry Pi Christmas Lights Controller",
+    "version": "v0.00.01",
+    "description": "Control christmas lights with your Raspberry Pi",
+    "author": "William Klausmeyer",
+    "main": "server.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/klawil/xmas_pi"
+    },
+    "private": false,
+    "license": "UNLICENSED",
+    "dependencies": {
+        "rpi-gpio": "^0.9.1"
+    }
+}

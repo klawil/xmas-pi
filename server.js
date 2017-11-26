@@ -24,6 +24,9 @@ const channels = [
   },
 ];
 
+// Initialize the GPIO
+setupPins();
+
 // Create the server
 http.createServer(requestHandler).listen(8080);
 

@@ -22,6 +22,26 @@ const channels = [
     name: 'Channel 4',
     color: 'blue',
   },
+  {
+    pin: 23,
+    name: 'Channel 5',
+    color: 'n/a',
+  },
+  {
+    pin: 18,
+    name: 'Channel 6',
+    color: 'n/a',
+  },
+  {
+    pin: 15,
+    name: 'Channel 7',
+    color: 'n/a',
+  },
+  {
+    pin: 14,
+    name: 'Channel 8',
+    color: 'n/a',
+  },
 ];
 
 // Initialize the GPIO

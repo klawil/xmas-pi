@@ -40,7 +40,7 @@ function setupPins() {
   };
 
   // Loop through all of the setup
-  channels.each(function(channel) {
+  channels.forEach(function(channel) {
     gpio.setup(channel.pin, gpio.DIR_HIGH, setupPinsCallback);
   });
 }
@@ -79,7 +79,7 @@ function getChannelStatus(response) {
   var callback_function;
 
   // Loop through the channels
-  channels.each(function(channel) {
+  channels.forEach(function(channel) {
     // Delete the old value
     delete channel.state;
 
@@ -102,7 +102,7 @@ function channelStatusCallback(response, channel, error, state) {
 
   // Check for writing to the response
   var is_complete = true;
-  channels.each(function(channel) {
+  channels.forEach(function(channel) {
     if (typeof channel.state === 'undefined') {
       is_complete = false;
     }

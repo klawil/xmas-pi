@@ -98,7 +98,7 @@ function channelStatusCallback(response, channel, error, state) {
   }
 
   // Set the channel state
-  channel.state = state || false;
+  channel.state = !state || false;
 
   // Check for writing to the response
   var is_complete = true;

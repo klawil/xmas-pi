@@ -160,6 +160,11 @@ function getAllChannels() {
   return channels.length;
 }
 
+/**
+ * Returns the color for the given channel
+ * @param  {Integer} channel The 0-based channel number
+ * @return {String}          The color of the channel
+ */
 function getChannelColor(channel) {
   return channels[channel].color;
 }

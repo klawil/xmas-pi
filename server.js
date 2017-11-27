@@ -1,144 +1,127 @@
-const http = require('http');
-const gpio = require('rpi-gpio');
+const express = require('express');
+const body_parser = require('body-parser');
+const app = express();
+const gpio = require('./control.js');
 
-const channels = [
-  {
-    pin: 7,
-    name: 'Channel 1',
-    color: 'red',
-  },
-  {
-    pin: 8,
-    name: 'Channel 2',
-    color: 'green',
-  },
-  {
-    pin: 25,
-    name: 'Channel 3',
-    color: 'white',
-  },
-  {
-    pin: 24,
-    name: 'Channel 4',
-    color: 'blue',
-  },
-  {
-    pin: 23,
-    name: 'Channel 5',
-    color: 'n/a',
-  },
-  {
-    pin: 18,
-    name: 'Channel 6',
-    color: 'n/a',
-  },
-  {
-    pin: 15,
-    name: 'Channel 7',
-    color: 'n/a',
-  },
-  {
-    pin: 14,
-    name: 'Channel 8',
-    color: 'n/a',
-  },
-];
+app.use(body_parser.json());
+app.use(body_parser.urlencoded({
+  extended: true,
+}));
 
 // Initialize the GPIO
-setupPins();
+gpio.setup();
 
-// Create the server
-http.createServer(requestHandler).listen(8080);
+/**
+ * This function handles the google assistant requests
+ * @param  {Object} request  The request object
+ * @param  {Object} response The response object
+ */
+function googleAssistantHandler(request, response) {
+  // Get the body of the request
+  request = request.body;
 
-function setupPins() {
-  // Set the pin numbering scheme to BCM
-  gpio.setMode(gpio.MODE_BCM);
-
-  // This variable is used to count how many times the setup function has returned
-  var setup_count = {
-    count: 0,
+  // Build the basic response object
+  var response_object = {
+    speech: 'This is a test response.',
+    displayText: 'This is a test text response',
+    data: {
+      google: {
+        expect_user_response: false,
+        is_ssml: false,
+      }
+    }
   };
 
-  // Loop through all of the setup
-  channels.forEach(function(channel) {
-    gpio.setup(channel.pin, gpio.DIR_HIGH, setupPinsCallback);
-  });
-}
+  switch (request.result.action) {
+    case 'light_control':
+      // Get the channels that have the correct color
+      channels = gpio.getChannelsByColor(request.result.parameters.color);
+      if (channels.length === 0) {
+        response_object.speech = 'It looks like there is no lights of that color.';
+      } else {
+        channels.forEach(function(channel) {
+          gpio.changeChannelState(channel, request.result.parameters.state === 'on', function() {});
+        });
 
-function setupPinsCallback(error) {
-  // Log the error if needed
-  if (error) {
-    console.log(error);
+        response_object.speech = 'Turning ' + request.result.parameters.state + ' the lights.';
+      }
+      break;
+    case 'all_lights':
+      // Get all of the channels
+      var channel_count = gpio.getAllChannels();
+
+      for (var channel = 0; channel < channel_count; channel++) {
+        gpio.changeChannelState(channel, request.result.parameters.state === 'on', function() {});
+      }
+
+      response_object.speech = 'Turning ' + request.result.parameters.state + ' all the lights.';
+      break;
+    case 'lights_status':
+      // Get the statuses
+      gpio.getChannelStates(function(error, states) {
+        // Loop over the states
+        var colors = [];
+        states.forEach(function(state, channel) {
+          if (state === (request.result.parameters.state === 'on')) {
+            colors.push(gpio.getChannelColor(channel));
+          }
+        });
+
+        // Unique and sort the colors
+        colors = colors.sort().filter(function(el, i, a) {
+          return el !== 'n/a' && i === a.indexOf(el);
+        });
+
+        // Build the response string
+        if (colors.length === 0) {
+          response_object.speech = 'Currently there are no lights on.';
+        } else if (colors.length === 1) {
+          response_object.speech = 'The ' + colors[0] + ' lights are on.';
+        } else if (colors.length === 2) {
+          response_object.speech = 'The ' + colors[0] + ' and ' + colors[1] + ' lights are on.';
+        } else {
+          response_object.speech = 'The ' + colors.reduce(function(value, current, index) {
+              // Add a comma
+              value += ', ';
+
+              // Add the and if we are at the end
+              if (index === colors.length - 1) {
+                value += 'and ';
+              }
+
+              // Add the current color
+              value += current
+
+              return value;
+            }) + ' lights are on.';
+        }
+
+        response_object.displayText = response_object.speech;
+        console.log(response_object.speech);
+        return response.send(JSON.stringify(response_object));
+      });
+      return;
+      break;
   }
+
+  response_object.displayText = response_object.speech;
+
+  console.log(response_object.speech);
+  return response.send(JSON.stringify(response_object));
 }
 
-function requestHandler(request, response) {
-  // Build the request body
-  var request_body = '';
-  request.on('data', function(data) {
-    request_body += data;
-  });
-
-  // Parse the request
-  request.on('end', function() {
-    // Check the url
-    switch (request.url) {
-      case '/status':
-        // Get the status of the channels
-        getChannelStatus(response);
-        break;
-      case '/google':
-        // Hand off to the google handler
-        googleAssistantHandler(request_body, response);
-      default:
-        response.writeHead(404);
-        return response.end();
-    }
+/**
+ * This function handles a call to the status endpoint
+ * @param  {Object} request  The request object
+ * @param  {Object} response The response object
+ */
+function statusHandler(request, response) {
+  // Get the pin states
+  gpio.getPinStates(function(error, states) {
+    response.send(JSON.stringify(states));
   });
 }
 
-function getChannelStatus(response) {
-  // Create the callback function
-  var callback_function;
-
-  // Loop through the channels
-  channels.forEach(function(channel) {
-    // Delete the old value
-    delete channel.state;
-
-    // Set up the callback function
-    callback_function = channelStatusCallback.bind(undefined, response, channel);
-
-    // Get the new value
-    gpio.read(channel.pin, callback_function);
-  });
-}
-
-function channelStatusCallback(response, channel, error, state) {
-  // Check for an error and log it
-  if (error) {
-    console.log(error);
-  }
-
-  // Set the channel state
-  channel.state = !state || false;
-
-  // Check for writing to the response
-  var is_complete = true;
-  channels.forEach(function(channel) {
-    if (typeof channel.state === 'undefined') {
-      is_complete = false;
-    }
-  });
-
-  if (is_complete) {
-    response.writeHead(200);
-    return response.end(JSON.stringify(channels));
-  }
-}
-
-function googleAssistantHandler(request, response) {
-  console.log(request);
-  response.writeHead(204);
-  return response.end();
-}
+app.all('/status', statusHandler);
+app.post('/google', googleAssistantHandler);
+app.listen(8080);

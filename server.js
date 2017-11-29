@@ -117,7 +117,7 @@ function googleAssistantHandler(request, response) {
  */
 function statusHandler(request, response) {
   // Get the pin states
-  gpio.getPinStates(function(error, states) {
+  gpio.getChannelStates(function(error, states) {
     response.send(JSON.stringify(states));
   });
 }

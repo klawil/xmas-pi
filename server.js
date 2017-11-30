@@ -129,7 +129,7 @@ function statusHandler(request, response) {
  */
 function setHandler(request, response) {
   // Get the body
-  request = request.body;
+  request = request.params;
 
   // Validate the request
   if (typeof request.channel !== 'undefined' && typeof request.state != 'undefined') {
@@ -145,5 +145,5 @@ function setHandler(request, response) {
 
 app.all('/status', statusHandler);
 app.post('/google', googleAssistantHandler);
-app.post('/set', setHandler);
+app.get('/set', setHandler);
 app.listen(8080);

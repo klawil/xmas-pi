@@ -112,8 +112,8 @@ function googleAssistantHandler(request, response) {
 
 /**
  * This function handles a call to the status endpoint
- * @param  {Object} request  The request object
- * @param  {Object} response The response object
+ * @param {Object} request  The request object
+ * @param {Object} response The response object
  */
 function statusHandler(request, response) {
   // Get the pin states
@@ -122,6 +122,28 @@ function statusHandler(request, response) {
   });
 }
 
+/**
+ * This handles post requests to set values
+ * @param {Object} request  The request object
+ * @param {Object} response The response object
+ */
+function setHandler(request, response) {
+  // Get the body
+  request = request.body;
+
+  // Validate the request
+  if (typeof request.channel !== 'undefined' && typeof request.state != 'undefined') {
+    gpio.changeChannelState(request.channel, request.state, function() {
+      statusHandler(request, response);
+    });
+    return;
+  }
+
+  // Send the states
+  statusHandler(request, response);
+}
+
 app.all('/status', statusHandler);
 app.post('/google', googleAssistantHandler);
+app.post('/set', setHandler);
 app.listen(8080);

@@ -133,7 +133,7 @@ function setHandler(request, response) {
 
   // Validate the request
   if (typeof request.channel !== 'undefined' && typeof request.state != 'undefined') {
-    gpio.changeChannelState(request.channel, request.state, function() {
+    gpio.changeChannelState(request.channel, request.state === 'true', function() {
       statusHandler(request, response);
     });
     return;

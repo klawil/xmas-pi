@@ -129,7 +129,7 @@ function statusHandler(request, response) {
  */
 function setHandler(request, response) {
   // Get the body
-  request = request.params;
+  request = request.query;
 
   // Validate the request
   if (typeof request.channel !== 'undefined' && typeof request.state != 'undefined') {
